@@ -3,12 +3,24 @@
 import requests
 import json
 from datetime import datetime
+import schedule
+import time
+import os # 用于检查文件是否存在
 
 # 在第一步中找到的真实的 API 地址
 AUSLASTUNG_API_URL = "https://counter.ticos-systems.cloud/api/gates/counter?organizationUnitIds=30182"
-#"https://www.swm.de/.resources/swmTemplates/themes/swm/css/bath-capacity/bath-capacity-item.css" 
+DATA_FILE = "pool_occupancy_log.csv" # 定义数据存储文件名
+
+def initialize_csv(filename):
+    """如果文件不存在，则写入 CSV 文件的表头"""
+    if not os.path.exists(filename):
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write("Timestamp,CurrentCount,MaxCapacity,OccupancyPercentage\n")
 
 def get_realtime_occupancy():
+    """获取数据并记录到 CSV 文件"""
+    initialize_csv(DATA_FILE) # 确保文件有表头
+
     """获取并返回泳池的实时占用率"""
     try:
         response = requests.get(AUSLASTUNG_API_URL, timeout=10)
@@ -35,6 +47,11 @@ def get_realtime_occupancy():
             occupancy_percentage = (current_count / max_capacity) * 100
             
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # **写入 CSV 文件**
+            with open(DATA_FILE, 'a', encoding='utf-8') as f:
+                f.write(f"{timestamp},{current_count},{max_capacity},{occupancy_percentage:.2f}\n")
+
             print("=" * 20)
             print(f"[{timestamp}] Echtzeit-Auslastung:")
             #print(f"  当前人数: {current_count} 人")
@@ -54,6 +71,13 @@ def get_realtime_occupancy():
         return None
 
 if __name__ == "__main__":
-    occupancy = get_realtime_occupancy()
-    # 可以在这里添加代码，将数据存储到文件或数据库
+    get_realtime_occupancy()
+    # 设置调度任务，每 15 分钟执行一次
+    #schedule.every(15).minutes.do(get_realtime_occupancy)
+    
+    #print(f"\n[调度器启动] 任务已设置：每 15 分钟自动爬取一次数据，并写入 {DATA_FILE}。")
+    
+    #while True:
+    #    schedule.run_pending()
+    #    time.sleep(1)
 
