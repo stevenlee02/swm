@@ -1,4 +1,3 @@
-#我想做一个爬虫程序，爬取游泳池网站的实时占用情况，请帮我写一个Python代码示例。
 #游泳池的网站是https://www.swm.de/baeder/olympia-schwimmhalle#auslastung
 
 import requests
