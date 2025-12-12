@@ -71,13 +71,24 @@ def get_realtime_occupancy():
         return None
 
 if __name__ == "__main__":
-    get_realtime_occupancy()
-    # 设置调度任务，每 15 分钟执行一次
-    #schedule.every(15).minutes.do(get_realtime_occupancy)
-    
-    #print(f"\n[调度器启动] 任务已设置：每 15 分钟自动爬取一次数据，并写入 {DATA_FILE}。")
-    
-    #while True:
-    #    schedule.run_pending()
-    #    time.sleep(1)
+    # 确保 CSV 文件已初始化
+    initialize_csv(DATA_FILE)
 
+    # 第一次立即运行
+    get_realtime_occupancy()
+
+    # 设定在每个小时的 00 分执行
+    schedule.every().hour.at(":00").do(get_realtime_occupancy)
+    # 设定在每个小时的 15 分执行
+    schedule.every().hour.at(":15").do(get_realtime_occupancy)
+    # 设定在每个小时的 30 分执行
+    schedule.every().hour.at(":30").do(get_realtime_occupancy)
+    # 设定在每个小时的 45 分执行
+    schedule.every().hour.at(":45").do(get_realtime_occupancy)
+    
+    print("\n[调度器启动] 任务已设置：在每个小时的 00, 15, 30, 45 分自动爬取一次数据。请勿关闭此窗口。")
+    
+    # 循环运行调度器
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATA_FILE = "pool_occupancy_log.csv"
 
@@ -15,8 +15,9 @@ def plot_daily_occupancy():
         df['Timestamp'] = pd.to_datetime(df['Timestamp'])
         
         # 提取日期，只绘制最近一天的记录（假设文件中有几天的记录）
+        wanted_date = datetime.now().date() - timedelta(days=1)
         latest_date = df['Timestamp'].dt.date.max()
-        df_today = df[df['Timestamp'].dt.date == latest_date]
+        df_today = df[df['Timestamp'].dt.date == wanted_date]
         
         if df_today.empty:
             print("错误：数据集中没有足够的当日记录来绘图。")
@@ -30,18 +31,20 @@ def plot_daily_occupancy():
                  marker='o', linestyle='-', color='skyblue', label='Occupancy Rate')
         
         # 4. 优化图表显示
-        plt.title(f"Olympia Schwimmhalle real-time utilization figure ({latest_date})")
+        plt.title(f"Olympia Schwimmhalle real-time utilization figure ({wanted_date})")
         plt.xlabel("Time")
         plt.ylabel("Utilization (%)")
         plt.grid(True, linestyle='--', alpha=0.7)
-        # x轴时间控制在当天范围内
-        plt.xlim(datetime.combine(latest_date, datetime.min.time()), 
-                 datetime.combine(latest_date, datetime.max.time()))
-        plt.yticks(range(0, 101, 10)) # Y轴显示 0% 到 100%
+        # x轴的时间控制
+        
+
+        plt.xlim(datetime.combine(wanted_date, datetime.min.time()), 
+                 datetime.combine(wanted_date, datetime.max.time()))
+        plt.yticks(range(0, 51, 10)) # Y轴显示 0% 到 100%
         plt.tight_layout() # 自动调整布局，避免标签重叠
         
         # 5. 保存图像
-        image_filename = f"occupancy_plot_{latest_date}.png"
+        image_filename = f"occupancy_plot_{wanted_date}.png"
         plt.savefig(image_filename)
         print(f"\n绘图完成！图像已保存为 {image_filename}")
         
